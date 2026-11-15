@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div class="staff-header-band" th:fragment="staffTopbar(username, dashboardUrl, dashboardLabel, showWarrantyLookup)">
+    <div class="container--wide">
+        <header class="app-topbar">
+            <a class="brand" th:href="${dashboardUrl}">
+                <img class="brand-mark" th:src="@{/images/logo-transparent.png}" alt="HauMai Care">
+                <span class="brand-copy"><strong>HauMai Care</strong><small>Hậu mãi & bảo hành</small></span>
+            </a>
+            <nav class="app-nav" aria-label="Điều hướng nhân viên">
+                <a class="app-nav-link" th:href="${dashboardUrl}" th:text="${dashboardLabel}">Công việc</a>
+                <a class="app-nav-link" th:if="${coQuyenSla and dashboardUrl != '/nhan-vien/ky-thuat-vien/ho-so'}" th:href="@{/nhan-vien/sla}">Giám sát SLA</a>
+                <a class="app-nav-link" th:if="${dashboardUrl != '/nhan-vien/ky-thuat-vien/ho-so'}" th:href="@{/nhan-vien/san-pham}">Sản phẩm</a>
+                <a class="app-nav-link" th:if="${showWarrantyLookup}" th:href="@{/khach/kiem-tra-bao-hanh}">Kiểm tra bảo hành</a>
+            </nav>
+            <div class="app-account">
+                <span class="user-chip"><span class="user-avatar" th:text="${#strings.substring(username, 0, 1).toUpperCase()}">U</span><span th:text="${username}">nhân viên</span></span>
+                <form th:action="@{/logout}" method="post"><button class="button--secondary" type="submit">Đăng xuất</button></form>
+            </div>
+        </header>
+    </div>
+</div>
+<footer class="staff-footer" th:fragment="staffFooter(showWarrantyLookup)">
+    <a class="footer-wordmark" th:href="@{/}"><img class="brand-mark" th:src="@{/images/logo-transparent.png}" alt="HauMai Care"><span><strong>HauMai Care</strong><small>Hậu mãi & bảo hành</small></span></a>
+    <span class="staff-footer-note">Trung tâm chăm sóc khách hàng</span>
+    <a class="staff-footer-link" th:if="${showWarrantyLookup}" th:href="@{/khach/kiem-tra-bao-hanh}">Kiểm tra bảo hành <span aria-hidden="true">↗</span></a>
+</footer>
+</body>
+</html>

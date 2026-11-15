@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Phân công kỹ thuật · HauMai Care</title><link rel="stylesheet" th:href="@{/css/app.css(v='20261103-header-unified')}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: staffTopbar(${username}, '/nhan-vien/ho-so', 'Điều phối hồ sơ', true)}"></div>
+<main class="container--narrow">
+    <a class="back-link" th:href="@{/nhan-vien/ho-so}">← Trở về danh sách</a>
+    <div class="page-heading"><div><p class="eyebrow">Điều phối · Phân công</p><h1>Chọn kỹ thuật viên</h1><p>Cân đối tải hiện tại để chuyển hồ sơ tới đúng người phụ trách.</p></div></div>
+    <section class="panel panel--pad">
+        <p class="eyebrow" th:text="${hoSo['ma_ho_so']}">Mã hồ sơ</p>
+        <dl class="detail-list">
+            <div><dt>Trạng thái</dt><dd th:text="${@nhanTrangThai.hienThi(hoSo['trang_thai'])}"></dd></div>
+            <div><dt>Khách hàng</dt><dd th:text="${hoSo['ten_khach_hang']}"></dd></div>
+            <div><dt>Số điện thoại</dt><dd><a th:href="|tel:${hoSo['so_dien_thoai']}|" th:text="${hoSo['so_dien_thoai']}"></a></dd></div>
+            <div><dt>Mô tả lỗi</dt><dd th:text="${hoSo['mo_ta_loi']}"></dd></div>
+        </dl>
+        <h2 class="section-divider">Tải công việc hiện tại</h2>
+        <div class="case-data-grid">
+            <div class="case-data" th:each="ktv : ${kyThuatViens}"><strong th:text="${ktv['ho_ten']}"></strong><small><span th:text="${ktv['ten_dang_nhap']}"></span> · <span th:text="${ktv['so_ho_so_dang_xu_ly']}"></span>/<span th:text="${ktv['gioi_han_ho_so']}"></span> hồ sơ</small></div>
+        </div>
+        <form th:action="@{/nhan-vien/ho-so/{id}/phan-cong(id=${hoSo['id']})}" th:object="${form}" method="post">
+            <label for="kyThuatVienId">Kỹ thuật viên phụ trách</label>
+            <select id="kyThuatVienId" th:field="*{kyThuatVienId}" required>
+                <option value="">Chọn kỹ thuật viên</option>
+                <option th:each="ktv : ${kyThuatViens}" th:value="${ktv['ky_thuat_vien_id']}" th:text="|${ktv['ho_ten']} — ${ktv['so_ho_so_dang_xu_ly']}/${ktv['gioi_han_ho_so']} hồ sơ|"></option>
+            </select>
+            <label for="lyDoThayDoi">Lý do phân công / thay đổi <span class="case-meta">· không bắt buộc</span></label>
+            <textarea id="lyDoThayDoi" th:field="*{lyDoThayDoi}" placeholder="Ghi chú ngắn cho lần phân công này"></textarea>
+            <button type="submit">Xác nhận phân công</button>
+        </form>
+    </section>
+    <div th:replace="~{fragments/layout :: staffFooter(true)}"></div>
+</main>
+</body>
+</html>

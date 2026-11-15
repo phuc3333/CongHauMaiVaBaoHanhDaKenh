@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+**/target/
+*.log
+hau_mai_before_pg_cron.dump
+.codex-review-ch7/

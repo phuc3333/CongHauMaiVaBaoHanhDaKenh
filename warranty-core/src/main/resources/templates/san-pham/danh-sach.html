@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sản phẩm bảo hành · HauMai Care</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20261103-header-unified')}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: staffTopbar(${username}, '/nhan-vien/ho-so', 'Hồ sơ', ${coQuyenKiemTraBaoHanh})}"></div>
+<main class="container">
+
+    <div class="page-heading">
+        <div><p class="eyebrow">Danh mục sản phẩm</p><h1>Sản phẩm và bảo hành</h1><p>Tra cứu serial đã đăng ký và hạn bảo hành để xác minh hồ sơ khách hàng.</p></div>
+    </div>
+
+    <section class="card-grid" aria-label="Tổng quan sản phẩm">
+        <article class="metric-card"><span class="metric-icon">▦</span><div><span class="metric-value" th:text="${#lists.size(sanPhams)}">0</span><span class="metric-label">Sản phẩm đã đăng ký</span></div></article>
+        <article class="metric-card"><span class="metric-icon">✓</span><div><span class="metric-value" th:text="${#lists.size(sanPhams.?[trang_thai_bao_hanh == 'CON_HAN'])}">0</span><span class="metric-label">Còn hạn bảo hành</span></div></article>
+        <article class="metric-card"><span class="metric-icon">⌛</span><div><span class="metric-value" th:text="${#lists.size(sanPhams.?[trang_thai_bao_hanh == 'HET_HAN'])}">0</span><span class="metric-label">Đã hết hạn</span></div></article>
+    </section>
+
+    <nav class="category-filter" data-category-filter="products" aria-label="Lọc sản phẩm theo bảo hành" th:if="${!#lists.isEmpty(sanPhams)}">
+        <button type="button" data-category="all" aria-pressed="true">Tất cả <span data-category-count="all"></span></button>
+        <button type="button" data-category="CON_HAN">Còn bảo hành <span data-category-count="CON_HAN"></span></button>
+        <button type="button" data-category="HET_HAN">Hết bảo hành <span data-category-count="HET_HAN"></span></button>
+        <button type="button" data-category="CHUA_XAC_DINH">Chưa xác định <span data-category-count="CHUA_XAC_DINH"></span></button>
+    </nav>
+
+    <div class="table-wrap" th:if="${!#lists.isEmpty(sanPhams)}">
+        <table>
+            <thead><tr><th>Serial</th><th>Sản phẩm</th><th>Ngày mua</th><th>Thời hạn</th><th>Hết hạn</th><th>Tình trạng</th></tr></thead>
+            <tbody>
+            <tr th:each="sanPham : ${sanPhams}" data-category-item="products" th:attr="data-category=${sanPham['trang_thai_bao_hanh']}">
+                <td><strong th:text="${sanPham['serial']}">HM-RO-2026-004</strong></td>
+                <td th:text="${sanPham['ten_san_pham']}">Máy lọc nước</td>
+                <td th:text="${sanPham['ngay_mua'] != null ? sanPham['ngay_mua'] : 'Chưa cập nhật'}">Ngày mua</td>
+                <td th:text="${sanPham['thoi_han_bao_hanh_thang'] != null ? sanPham['thoi_han_bao_hanh_thang'] + ' tháng' : 'Chưa xác định'}">24 tháng</td>
+                <td th:text="${sanPham['ngay_het_han_bao_hanh'] != null ? sanPham['ngay_het_han_bao_hanh'] : 'Chưa xác định'}">Ngày hết hạn</td>
+                <td>
+                    <span class="status-pill" th:if="${sanPham['trang_thai_bao_hanh'] == 'CON_HAN'}" th:text="${'Còn hạn · ' + sanPham['so_ngay_con_lai'] + ' ngày'}">Còn hạn</span>
+                    <span class="status-pill status-pill--closed" th:if="${sanPham['trang_thai_bao_hanh'] == 'HET_HAN'}">Hết hạn</span>
+                    <span class="status-pill status-pill--waiting" th:if="${sanPham['trang_thai_bao_hanh'] == 'CHUA_XAC_DINH'}">Chưa xác định</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="empty" th:if="${#lists.isEmpty(sanPhams)}">Chưa có sản phẩm nào được đăng ký.</div>
+    <p class="footer-note">Serial chưa xuất hiện trong danh mục sẽ được ghi nhận là serial khách khai báo, chưa xác minh sản phẩm.</p>
+    <div th:replace="~{fragments/layout :: staffFooter(${coQuyenKiemTraBaoHanh})}"></div>
+</main>
+<script th:src="@{/js/category-filter.js}" th:if="${!#lists.isEmpty(sanPhams)}" defer></script>
+</body>
+</html>
+

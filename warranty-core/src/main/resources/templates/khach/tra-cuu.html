@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tra cứu hồ sơ · HauMai Care</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20261028-logo')}">
+</head>
+<body>
+<main class="container--narrow">
+    <header class="page-top">
+        <a class="brand" th:href="@{/}"><img class="brand-mark" th:src="@{/images/logo-transparent.png}" alt="HauMai Care"><span class="brand-copy"><strong>HauMai Care</strong><small>Customer support</small></span></a>
+        <a class="nav-link" th:href="@{/khach/kiem-tra-bao-hanh}">Kiểm tra bảo hành</a>
+    </header>
+
+    <div class="page-heading"><div><p class="eyebrow">Cập nhật tình trạng</p><h1>Tra cứu hồ sơ</h1><p>Nhập mã hồ sơ và số điện thoại đã đăng ký để xem tiến độ bảo hành.</p></div></div>
+    <section class="panel panel--pad">
+        <p class="error" th:if="${loiTraCuu}" th:text="${loiTraCuu}"></p>
+        <form th:action="@{/khach/tra-cuu}" method="post">
+            <label for="maHoSo">Mã hồ sơ</label>
+            <input id="maHoSo" name="maHoSo" th:value="${maHoSoNhap}" placeholder="Ví dụ: HS-2026-000001" required maxlength="30">
+            <label for="soDienThoai">Số điện thoại</label>
+            <input id="soDienThoai" name="soDienThoai" type="tel" autocomplete="tel" th:value="${soDienThoaiNhap}" placeholder="Số điện thoại đã đăng ký" required maxlength="30">
+            <button type="submit">Tra cứu hồ sơ <span aria-hidden="true">→</span></button>
+        </form>
+    </section>
+
+    <section class="panel panel--pad" style="margin-top:18px" th:if="${ketQuaTraCuu != null}">
+        <p class="eyebrow">Thông tin tiếp nhận</p>
+        <h2 th:text="${ketQuaTraCuu['ma_ho_so']}">Mã hồ sơ</h2>
+        <div class="case-flow" aria-label="Tiến trình hồ sơ">
+            <div class="flow-step flow-step--done"><span>1</span><strong>Tiếp nhận</strong><small>Đã tạo hồ sơ</small></div>
+            <div class="flow-step" th:classappend="${ketQuaTraCuu['trang_thai'] == 'DANG_XAC_MINH' or ketQuaTraCuu['trang_thai'] == 'CHO_KHACH_BO_SUNG' ? 'flow-step--active' : (ketQuaTraCuu['trang_thai'] == 'CHO_PHAN_CONG' or ketQuaTraCuu['trang_thai'] == 'DANG_SUA_CHUA' or ketQuaTraCuu['trang_thai'] == 'CHO_CSKH_XU_LY' or ketQuaTraCuu['trang_thai'] == 'DA_SUA_XONG' or ketQuaTraCuu['trang_thai'] == 'TU_CHOI' or ketQuaTraCuu['trang_thai'] == 'DA_DONG' ? 'flow-step--done' : '')}"><span>2</span><strong>Xác minh</strong><small>CSKH kiểm tra bảo hành</small></div>
+            <div class="flow-step" th:classappend="${ketQuaTraCuu['trang_thai'] == 'DANG_SUA_CHUA' ? 'flow-step--active' : (ketQuaTraCuu['trang_thai'] == 'CHO_CSKH_XU_LY' or ketQuaTraCuu['trang_thai'] == 'DA_SUA_XONG' or ketQuaTraCuu['trang_thai'] == 'DA_DONG' ? 'flow-step--done' : '')}"><span>3</span><strong>Sửa chữa</strong><small>Kỹ thuật viên xử lý</small></div>
+            <div class="flow-step" th:classappend="${ketQuaTraCuu['trang_thai'] == 'CHO_CSKH_XU_LY' or ketQuaTraCuu['trang_thai'] == 'DA_SUA_XONG' ? 'flow-step--active' : (ketQuaTraCuu['trang_thai'] == 'DA_DONG' or ketQuaTraCuu['trang_thai'] == 'TU_CHOI' ? 'flow-step--done' : '')}"><span>4</span><strong>Kết quả</strong><small>CSKH hoàn tất hồ sơ</small></div>
+        </div>
+        <dl class="detail-list">
+            <div><dt>Trạng thái</dt><dd><span class="status-pill" th:text="${ketQuaTraCuu['trang_thai_hien_thi']}"></span></dd></div>
+            <div><dt>Sản phẩm</dt><dd th:text="${ketQuaTraCuu['ten_san_pham'] != null ? ketQuaTraCuu['ten_san_pham'] : 'Chưa xác định'}"></dd></div>
+            <div><dt>Serial</dt><dd th:text="${ketQuaTraCuu['serial'] != null ? ketQuaTraCuu['serial'] : 'Chưa cung cấp'}"></dd></div>
+            <div><dt>Tiếp nhận lúc</dt><dd th:text="${ketQuaTraCuu['ngay_tiep_nhan']}"></dd></div>
+            <div><dt>Kênh tiếp nhận</dt><dd th:text="${ketQuaTraCuu['kenh_tiep_nhan']}"></dd></div>
+            <div><dt>Tiến độ xử lý</dt><dd th:text="${ketQuaTraCuu['tien_do']}"></dd></div>
+            <div th:if="${ketQuaTraCuu['ket_luan_xu_ly'] != null and (ketQuaTraCuu['trang_thai'] == 'DA_SUA_XONG' or ketQuaTraCuu['trang_thai'] == 'TU_CHOI' or ketQuaTraCuu['trang_thai'] == 'DA_DONG')}"><dt>Kết luận</dt><dd th:text="${ketQuaTraCuu['ket_luan_xu_ly']}"></dd></div>
+        </dl>
+    </section>
+    <p class="footer-note">HauMai Care · Theo dõi yêu cầu bảo hành của bạn</p>
+</main>
+</body>
+</html>

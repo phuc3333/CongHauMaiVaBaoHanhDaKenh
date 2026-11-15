@@ -1,0 +1,102 @@
+﻿services:
+  postgres:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    image: hau-mai-postgres-cron:16
+    environment:
+      POSTGRES_DB: hau_mai
+      POSTGRES_USER: hau_mai
+      POSTGRES_PASSWORD: ${HAU_MAI_DB_PASSWORD:?Set HAU_MAI_DB_PASSWORD in the project .env file}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_cron_data:/var/lib/postgresql/data
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_cron
+      - -c
+      - cron.database_name=hau_mai
+      - -c
+      - cron.timezone=Asia/Ho_Chi_Minh
+      - -c
+      - cron.use_background_workers=on
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hau_mai -d hau_mai"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    restart: unless-stopped
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  warranty-core:
+    restart: unless-stopped
+    image: project-warranty-core:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+      args:
+        MAVEN_MODULE: warranty-core
+        APP_MODULE: warranty-core
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hau_mai?escapeSyntaxCallMode=callIfNoReturn
+      SPRING_DATASOURCE_USERNAME: hau_mai_app
+      SPRING_DATASOURCE_PASSWORD: ${HAU_MAI_APP_PASSWORD:?Set HAU_MAI_APP_PASSWORD in the project .env file}
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/hau_mai?escapeSyntaxCallMode=callIfNoReturn
+      SPRING_FLYWAY_USER: hau_mai
+      SPRING_FLYWAY_PASSWORD: ${HAU_MAI_DB_PASSWORD:?Set HAU_MAI_DB_PASSWORD in the project .env file}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  channel-gateway:
+    restart: unless-stopped
+    image: project-channel-gateway:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+      args:
+        MAVEN_MODULE: channel-gateway
+        APP_MODULE: channel-gateway
+    environment:
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      CHANNEL_INGEST_SECRET: ${CHANNEL_INGEST_SECRET:-}
+      ZALO_APP_ID: ${ZALO_APP_ID:-}
+      ZALO_OA_WEBHOOK_SECRET: ${ZALO_OA_WEBHOOK_SECRET:-}
+      ZALO_DEMO_ENABLED: ${ZALO_DEMO_ENABLED:-false}
+      ZALO_SENDER: ${ZALO_SENDER:-fake}
+      ZALO_OA_ACCESS_TOKEN: ${ZALO_OA_ACCESS_TOKEN:-}
+      FACEBOOK_VERIFY_TOKEN: ${FACEBOOK_VERIFY_TOKEN:-}
+      FACEBOOK_APP_SECRET: ${FACEBOOK_APP_SECRET:-}
+      FACEBOOK_PAGE_ID: ${FACEBOOK_PAGE_ID:-}
+      FACEBOOK_PAGE_ACCESS_TOKEN: ${FACEBOOK_PAGE_ACCESS_TOKEN:-}
+      FACEBOOK_GRAPH_API_VERSION: ${FACEBOOK_GRAPH_API_VERSION:-v26.0}
+    ports:
+      - "127.0.0.1:8081:8081"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_cron_data:
+  redis_data:

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HauMai Care · Chăm sóc sau mua</title>
+    <meta name="description" content="Kiểm tra thời hạn bảo hành và theo dõi tiến độ sửa chữa cùng HauMai Care.">
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20261028-logo')}">
+</head>
+<body class="customer-home">
+<header class="home-header">
+    <div class="home-container home-header-inner">
+        <a class="brand" th:href="@{/}"><img class="brand-mark" th:src="@{/images/logo-transparent.png}" alt="HauMai Care"><span class="brand-copy"><strong>HauMai Care</strong><small>Hậu mãi & bảo hành</small></span></a>
+        <nav class="home-nav" aria-label="Điều hướng chính">
+            <a href="#quy-trinh">Quy trình</a>
+            <a href="#ho-tro">Kênh hỗ trợ</a>
+            <a class="home-staff-link" th:href="@{/login}">Đăng nhập nhân viên <span aria-hidden="true">↗</span></a>
+        </nav>
+    </div>
+</header>
+<main class="home-container home-main">
+    <section class="home-hero">
+        <div class="home-hero-copy">
+            <p class="eyebrow"><span class="eyebrow-dot"></span> Chăm sóc bạn sau mỗi lần mua</p>
+            <h1>An tâm sử dụng.<br><span>Đã có HauMai Care.</span></h1>
+            <p class="home-intro">Tra cứu bảo hành, xem tiến độ sửa chữa và cập nhật kết quả hồ sơ của bạn trong vài bước đơn giản.</p>
+            <div class="home-actions">
+                <a class="button home-primary" th:href="@{/khach/tra-cuu}">Tra cứu hồ sơ <span aria-hidden="true">→</span></a>
+                <a class="home-text-link" th:href="@{/khach/kiem-tra-bao-hanh}">Kiểm tra bảo hành bằng serial <span aria-hidden="true">↗</span></a>
+            </div>
+            <div class="home-assurance"><span class="assurance-icon">✓</span><span><strong>Thông tin rõ ràng</strong><small>Theo dõi tiến độ từng bước</small></span><i></i><span><strong>Hỗ trợ thuận tiện</strong><small>Kết nối qua kênh bạn dùng</small></span></div>
+        </div>
+        <div class="home-hero-visual">
+            <div class="visual-glow"></div>
+            <img src="/images/baohanh.jpg" alt="Hình minh họa dịch vụ bảo hành HauMai Care">
+            <div class="floating-note floating-note--top"><span>✦</span><div><strong>Luôn đồng hành</strong><small>Từ tiếp nhận đến hoàn tất</small></div></div>
+            <div class="floating-note floating-note--bottom"><span class="note-check">✓</span><div><strong>Cập nhật minh bạch</strong><small>Trạng thái hồ sơ dễ theo dõi</small></div></div>
+        </div>
+    </section>
+
+    <section class="home-process" id="quy-trinh">
+        <div class="home-section-title"><div><p class="eyebrow">Đơn giản và dễ theo dõi</p><h2>Hai cách tra cứu, tùy điều bạn cần</h2></div><p>Kiểm tra thời hạn bằng serial hoặc theo dõi hồ sơ bằng mã hồ sơ và số điện thoại.</p></div>
+        <div class="home-steps">
+            <article class="home-step"><span class="step-number">01</span><span class="step-icon">⌕</span><h3>Kiểm tra bảo hành</h3><p>Nhập serial sản phẩm để xem còn hạn hay đã hết hạn.</p></article>
+            <article class="home-step"><span class="step-number">02</span><span class="step-icon">◷</span><h3>Tra cứu hồ sơ</h3><p>Nhập mã hồ sơ cùng số điện thoại đã đăng ký.</p></article>
+            <article class="home-step"><span class="step-number">03</span><span class="step-icon">✓</span><h3>Theo dõi kết quả</h3><p>Xem trạng thái sửa chữa và kết luận khi hồ sơ hoàn tất.</p></article>
+        </div>
+    </section>
+
+    <section class="home-support" id="ho-tro">
+        <div class="support-icon" aria-hidden="true">♡</div>
+        <div><p class="eyebrow">Bạn cần hỗ trợ?</p><h2>Chúng tôi luôn sẵn sàng lắng nghe.</h2><p>Nếu chưa có mã hồ sơ hoặc cần gửi yêu cầu mới, hãy liên hệ HauMai Care qua Facebook Messenger hoặc Zalo.</p></div>
+        <a class="button home-support-link" th:href="@{/khach/kiem-tra-bao-hanh}">Kiểm tra bảo hành <span aria-hidden="true">→</span></a>
+    </section>
+</main>
+<footer class="home-footer">
+    <div class="home-container footer-main">
+        <div class="footer-brand"><a class="brand" th:href="@{/}"><img class="brand-mark" th:src="@{/images/logo-transparent.png}" alt="HauMai Care"><span class="brand-copy"><strong>HauMai Care</strong><small>Hậu mãi & bảo hành</small></span></a><p>Chăm sóc tận tâm, đồng hành cùng bạn trên suốt hành trình sử dụng sản phẩm.</p></div>
+        <div class="footer-links"><strong>Dành cho khách hàng</strong><a th:href="@{/khach/kiem-tra-bao-hanh}">Kiểm tra bảo hành</a><a th:href="@{/khach/tra-cuu}">Tra cứu hồ sơ</a><a href="#quy-trinh">Quy trình bảo hành</a><a href="#ho-tro">Kênh hỗ trợ</a></div>
+        <div class="footer-links"><strong>HauMai Care</strong><span>Trung tâm hậu mãi</span><a th:href="@{/login}">Khu vực nhân viên</a></div>
+    </div>
+    <div class="home-container footer-bottom"><span>© 2026 HauMai Care</span><span>Đồng hành cùng bạn sau khi mua hàng</span></div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Xác minh bảo hành · HauMai Care</title><link rel="stylesheet" th:href="@{/css/app.css(v='20261103-header-unified')}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: staffTopbar(${username}, '/nhan-vien/ho-so', 'Hộp thư CSKH', true)}"></div>
+<main class="container--narrow">
+    <a class="back-link" th:href="@{/nhan-vien/ho-so}">← Trở về hộp thư</a>
+    <div class="page-heading"><div><p class="eyebrow">CSKH · Kiểm tra thông tin</p><h1>Xác minh bảo hành</h1><p>Kiểm tra serial và ghi nhận quyết định xử lý cho hồ sơ.</p></div></div>
+    <section class="panel panel--pad warranty-check-panel">
+        <header class="warranty-case-heading">
+            <div><p class="eyebrow">Hồ sơ cần xác minh</p><h2 th:text="${hoSo['ma_ho_so']}">HS-2026-000024</h2></div>
+            <span class="status-pill">Đang xác minh</span>
+        </header>
+
+        <section class="warranty-product-card" th:if="${hoSo['serial_da_dang_ky'] != null}">
+            <div class="warranty-product-heading">
+                <div><span class="warranty-product-label">Sản phẩm đã đăng ký</span><h3 th:text="${hoSo['ten_san_pham']}">Máy lọc nước</h3></div>
+                <span class="warranty-result"
+                      th:classappend="${hoSo['con_bao_hanh'] == true ? ' warranty-result--active' : (hoSo['con_bao_hanh'] == false ? ' warranty-result--expired' : ' warranty-result--unknown')}"
+                      th:text="${hoSo['con_bao_hanh'] == true ? 'Còn bảo hành' : (hoSo['con_bao_hanh'] == false ? 'Đã hết hạn' : 'Chưa đủ dữ liệu')}">Còn bảo hành</span>
+            </div>
+            <div class="warranty-product-details">
+                <div><small>Serial</small><strong th:text="${hoSo['serial_da_dang_ky']}">HM-RO-2026-007</strong></div>
+                <div><small>Ngày mua</small><strong th:text="${hoSo['ngay_mua'] != null ? hoSo['ngay_mua'] : 'Chưa cập nhật'}">Ngày mua</strong></div>
+                <div><small>Hạn bảo hành</small><strong th:text="${hoSo['ngay_het_han_bao_hanh'] != null ? hoSo['ngay_het_han_bao_hanh'] : 'Chưa xác định'}">Ngày hết hạn</strong></div>
+            </div>
+            <p class="warranty-result-note" th:if="${hoSo['con_bao_hanh'] == true}">Sản phẩm còn hạn tại thời điểm tiếp nhận hồ sơ.</p>
+            <p class="warranty-result-note" th:if="${hoSo['con_bao_hanh'] == false}">Đã hết hạn bảo hành. Khách vẫn có thể đồng ý sửa chữa có tính phí.</p>
+            <p class="warranty-result-note" th:if="${hoSo['con_bao_hanh'] == null}">Đã tìm thấy sản phẩm nhưng chưa đủ thông tin ngày mua hoặc hạn bảo hành để kết luận.</p>
+        </section>
+
+        <section class="warranty-product-card warranty-product-card--missing" th:if="${hoSo['serial_da_dang_ky'] == null}">
+            <div class="warranty-missing-icon" aria-hidden="true">?</div>
+            <div>
+                <span class="warranty-product-label">Chưa tìm thấy sản phẩm trong danh mục</span>
+                <h3 th:text="${hoSo['serial_khach_khai_bao'] != null ? hoSo['serial_khach_khai_bao'] : 'Khách chưa cung cấp serial'}">Serial khách khai báo</h3>
+                <p th:if="${hoSo['serial_khach_khai_bao'] != null}">Serial này chưa khớp sản phẩm đã đăng ký. Hãy xin khách hàng hóa đơn hoặc ảnh tem sản phẩm để kiểm tra thêm.</p>
+                <p th:if="${hoSo['serial_khach_khai_bao'] == null}">Cần xin khách hàng serial và hóa đơn hoặc ảnh tem sản phẩm trước khi xác minh.</p>
+            </div>
+        </section>
+
+        <p class="notice" th:if="${hoSo['con_bao_hanh'] == null}">Chưa thể kết luận bảo hành. Khi gửi xác minh, hồ sơ sẽ chuyển sang trạng thái chờ khách bổ sung thông tin.</p>
+        <form th:action="@{/nhan-vien/ho-so/{id}/xac-minh(id=${hoSo['id']})}" th:object="${form}" method="post">
+            <div th:if="${hoSo['con_bao_hanh'] == true}">
+                <label for="quyetDinh">Quyết định</label>
+                <select id="quyetDinh" th:field="*{quyetDinh}" required>
+                    <option value="">Chọn quyết định</option><option value="DU_DIEU_KIEN">Đủ điều kiện bảo hành</option><option value="TU_CHOI">Từ chối bảo hành</option>
+                </select>
+                <label for="lyDoTuChoi">Lý do từ chối <span class="case-meta">· bắt buộc nếu từ chối</span></label>
+                <textarea id="lyDoTuChoi" th:field="*{lyDoTuChoi}" placeholder="Nêu rõ lý do để khách hàng dễ theo dõi"></textarea>
+            </div>
+            <div th:if="${hoSo['con_bao_hanh'] == false}" class="warranty-paid-repair">
+                <p><strong>Trước khi chọn:</strong> hãy báo chi phí sửa chữa cho khách qua Messenger/Zalo và chỉ chọn đồng ý sau khi khách xác nhận.</p>
+                <label for="quyetDinhHetHan">Ý kiến của khách</label>
+                <select id="quyetDinhHetHan" th:field="*{quyetDinh}" required>
+                    <option value="">Chọn phản hồi của khách</option>
+                    <option value="SUA_CHUA_CO_PHI">Khách đồng ý sửa chữa có tính phí</option>
+                    <option value="TU_CHOI">Khách không đồng ý sửa chữa</option>
+                </select>
+            </div>
+            <button type="submit" th:text="${hoSo['con_bao_hanh'] == null ? 'Yêu cầu khách bổ sung' : (hoSo['con_bao_hanh'] == false ? 'Lưu phản hồi và tiếp tục' : 'Lưu kết quả xác minh')}">Lưu kết quả xác minh</button>
+        </form>
+    </section>
+    <div th:replace="~{fragments/layout :: staffFooter(true)}"></div>
+</main>
+</body>
+</html>

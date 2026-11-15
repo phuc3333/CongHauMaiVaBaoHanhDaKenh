@@ -1,0 +1,3 @@
+CREATE SEQUENCE ho_so_code_seq
+    START WITH 1
+    INCREMENT BY 1;

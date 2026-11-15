@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hồ sơ bảo hành · HauMai Care</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20261103-header-unified')}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: staffTopbar(${username}, '/nhan-vien/ho-so', ${laCskh ? 'Hộp thư CSKH' : 'Điều phối hồ sơ'}, true)}"></div>
+<main class="container--wide">
+
+    <div class="page-heading" th:if="${!laCskh}">
+        <div><p class="eyebrow" th:text="${laDieuPhoiVien ? 'Khu vực điều phối' : 'Trung tâm xử lý'}">Trung tâm xử lý</p><h1 th:text="${laDieuPhoiVien ? 'Hàng đợi phân công' : 'Hồ sơ bảo hành'}">Hồ sơ bảo hành</h1><p th:text="${laDieuPhoiVien ? 'Theo dõi hồ sơ chờ phân công và cân đối công việc kỹ thuật viên.' : 'Tiếp nhận, xác minh và phản hồi khách hàng trên cùng một màn hình.'}">Tiếp nhận, xác minh và phản hồi khách hàng trên cùng một màn hình.</p></div>
+        <div class="heading-actions">
+            <a class="button button--secondary" th:href="@{/khach/tra-cuu}">Mở trang tra cứu</a>
+        </div>
+    </div>
+
+    <p class="success" th:if="${thongBaoThanhCong}" th:text="${thongBaoThanhCong}"></p>
+    <p class="error" th:if="${loiThaoTac}" th:text="${loiThaoTac}"></p>
+
+    <section class="inbox-shell" id="inbox-shell" th:if="${laCskh}" aria-label="Hộp thư chăm sóc khách hàng">
+        <aside class="inbox-sidebar">
+            <div class="inbox-sidebar-heading">
+                <div><p class="eyebrow">Hộp thư CSKH</p><h2>Cuộc trò chuyện</h2></div>
+                <span class="inbox-count" id="conversation-count" th:text="${#lists.size(cuocTroChuyen)}">0</span>
+            </div>
+            <label class="sr-only" for="case-search">Tìm hồ sơ</label>
+            <input id="case-search" class="inbox-search" type="search" placeholder="Tìm mã hồ sơ, nội dung...">
+            <div class="inbox-list" id="inbox-list">
+                <p class="inbox-section-label">Cuộc trò chuyện Messenger và Zalo</p>
+                <div id="conversation-list">
+                <a class="inbox-case inbox-thread" th:each="conversation : ${cuocTroChuyen}"
+                   th:href="@{/nhan-vien/ho-so(conversationId=${conversation['id']})}"
+                   th:classappend="${cuocTroChuyenDangChon != null and cuocTroChuyenDangChon['id'].longValue() == conversation['id'].longValue() ? ' inbox-case--active' : ''}"
+                   th:attr="data-search=${conversation['ma_nguoi_dung_kenh'] + ' ' + conversation['ma_kenh'] + ' ' + conversation['tin_moi_nhat']}">
+                    <span class="inbox-avatar" th:text="${conversation['ma_kenh'] == 'ZALO' ? 'Z' : 'M'}">M</span>
+                    <span class="inbox-case-copy">
+                        <span class="inbox-case-top"><strong th:text="${(conversation['ma_kenh'] == 'ZALO' ? 'Khách Zalo ' : 'Khách Messenger ') + conversation['id']}">Khách</strong><small th:text="${conversation['cap_nhat_luc']}">Mới nhất</small></span>
+                        <span class="inbox-case-preview" th:text="${conversation['tin_moi_nhat'] != null ? conversation['tin_moi_nhat'] : 'Chưa có tin nhắn'}">Tin nhắn gần nhất</span>
+                        <span class="inbox-channel" th:text="${(conversation['ma_kenh'] == 'ZALO' ? 'Zalo' : 'Messenger') + (conversation['ho_so_id'] != null ? ' · Đã liên kết hồ sơ' : ' · Chưa có hồ sơ')}">Kênh chat</span>
+                    </span>
+                </a>
+                </div>
+                <p class="inbox-section-label">Hồ sơ bảo hành</p>
+                <a class="inbox-case" th:each="hoSo : ${hoSos}"
+                   th:href="@{/nhan-vien/ho-so(caseId=${hoSo.id})}"
+                   th:classappend="${hoSoDangChon != null and hoSoDangChon.id == hoSo.id ? ' inbox-case--active' : ''}"
+                   th:attr="data-search=${hoSo.maHoSo + ' ' + hoSo.moTaLoi + ' ' + hoSo.trangThai + ' ' + thongTinKhachHangTheoHoSo[hoSo.id]['ten_khach_hang'] + ' ' + thongTinKhachHangTheoHoSo[hoSo.id]['so_dien_thoai'] + ' ' + (hoSoFacebook.contains(hoSo.id) ? 'Messenger Facebook' : (hoSoZalo.contains(hoSo.id) ? 'Zalo' : 'Website'))}">
+                    <span class="inbox-avatar" th:text="${hoSoFacebook.contains(hoSo.id) ? 'M' : (hoSoZalo.contains(hoSo.id) ? 'Z' : 'H')}">H</span>
+                    <span class="inbox-case-copy">
+                        <span class="inbox-case-top"><strong th:text="${hoSo.maHoSo}">HS-2026-000001</strong><small th:text="${@nhanTrangThai.hienThi(hoSo.trangThai)}">Mới</small></span>
+                        <span class="inbox-case-preview" th:text="${hoSo.moTaLoi}">Mô tả yêu cầu</span>
+                        <span class="inbox-channel" th:text="${hoSoFacebook.contains(hoSo.id) ? 'Messenger' : (hoSoZalo.contains(hoSo.id) ? 'Zalo' : 'Hồ sơ bảo hành')}">Messenger</span>
+                    </span>
+                </a>
+                <p class="inbox-empty" id="inbox-no-results" hidden>Không tìm thấy hồ sơ phù hợp.</p>
+            </div>
+        </aside>
+
+        <section class="chat-panel" th:if="${cuocTroChuyenDangChon != null}">
+            <header class="chat-header">
+                <button class="chat-back" type="button" id="chat-back" aria-label="Quay lại danh sách">←</button>
+                <span class="inbox-avatar inbox-avatar--large" th:text="${cuocTroChuyenDangChon['ma_kenh'] == 'ZALO' ? 'Z' : 'M'}">M</span>
+                <div class="chat-header-copy"><strong th:text="${(cuocTroChuyenDangChon['ma_kenh'] == 'ZALO' ? 'Khách Zalo ' : 'Khách Messenger ') + cuocTroChuyenDangChon['id']}">Khách</strong><span th:text="${(cuocTroChuyenDangChon['ma_kenh'] == 'ZALO' ? 'Zalo' : 'Messenger') + ' · trò chuyện tự do'}">Kênh · trò chuyện</span></div>
+                <span class="status-pill" th:text="${cuocTroChuyenDangChon['ho_so_id'] != null ? 'Đã liên kết hồ sơ' : 'Chưa có hồ sơ'}">Chưa có hồ sơ</span>
+            </header>
+            <div class="chat-messages" id="chat-messages" data-conversation="true" th:attr="data-messages-url=@{/nhan-vien/ho-so/cuoc-tro-chuyen/{id}/tin-nhan(id=${cuocTroChuyenDangChon['id']})}">
+                <div class="chat-date-divider"><span>Cuộc trò chuyện với khách</span></div>
+            </div>
+            <div class="chat-feedback" id="chat-feedback" role="status" aria-live="polite"></div>
+            <form class="chat-composer" th:action="@{/nhan-vien/ho-so/cuoc-tro-chuyen/{id}/phan-hoi(id=${cuocTroChuyenDangChon['id']})}" method="post" data-chat-form>
+                <label class="sr-only" for="conversation-reply">Tin nhắn phản hồi</label>
+                <textarea id="conversation-reply" name="noiDung" maxlength="2000" th:placeholder="${cuocTroChuyenDangChon['ma_kenh'] == 'ZALO' ? 'Nhập tin nhắn Zalo...' : 'Nhập tin nhắn Messenger...'}" required></textarea>
+                <button type="submit" aria-label="Gửi tin nhắn">Gửi <span aria-hidden="true">↑</span></button>
+                <small th:text="${cuocTroChuyenDangChon['ma_kenh'] == 'ZALO' ? 'Gửi qua Zalo · mô phỏng nếu chưa cấu hình OA thật' : 'Gửi trực tiếp qua Messenger'}">Gửi qua kênh</small>
+            </form>
+        </section>
+        <section class="chat-panel" th:if="${hoSoDangChon != null and cuocTroChuyenDangChon == null}">
+            <header class="chat-header">
+                <button class="chat-back" type="button" id="chat-back" aria-label="Quay lại danh sách hồ sơ">←</button>
+                <span class="inbox-avatar inbox-avatar--large" th:text="${hoSoFacebook.contains(hoSoDangChon.id) ? 'M' : (hoSoZalo.contains(hoSoDangChon.id) ? 'Z' : 'H')}">M</span>
+                <div class="chat-header-copy">
+                    <strong th:text="${hoSoDangChon.maHoSo}">HS-2026-000001</strong>
+                    <span th:text="${hoSoFacebook.contains(hoSoDangChon.id) ? 'Messenger · Khách hàng' : (hoSoZalo.contains(hoSoDangChon.id) ? 'Zalo · Khách hàng' : 'Yêu cầu từ website')}">Messenger · Khách hàng</span>
+                </div>
+                <span class="status-pill" th:text="${@nhanTrangThai.hienThi(hoSoDangChon.trangThai)}">Mới</span>
+            </header>
+            <div class="chat-messages" id="chat-messages"
+                 th:attr="data-messages-url=@{/nhan-vien/ho-so/{id}/tin-nhan(id=${hoSoDangChon.id})}">
+                <div class="chat-date-divider"><span>Trao đổi về hồ sơ này</span></div>
+            </div>
+            <div class="chat-feedback" id="chat-feedback" role="status" aria-live="polite"></div>
+            <form class="chat-composer" th:if="${hoSoFacebook.contains(hoSoDangChon.id)}" th:action="@{/nhan-vien/ho-so/{id}/phan-hoi-facebook(id=${hoSoDangChon.id})}" method="post" data-chat-form>
+                <label class="sr-only" for="chat-reply">Tin nhắn phản hồi</label>
+                <textarea id="chat-reply" name="noiDung" maxlength="2000" placeholder="Nhập tin nhắn Messenger..." required></textarea>
+                <button type="submit" aria-label="Gửi tin nhắn">Gửi <span aria-hidden="true">↑</span></button>
+                <small>Tin nhắn được gửi qua Messenger · tối đa 2000 ký tự</small>
+            </form>
+            <form class="chat-composer" th:if="${hoSoZalo.contains(hoSoDangChon.id)}" th:action="@{/nhan-vien/ho-so/{id}/phan-hoi-zalo(id=${hoSoDangChon.id})}" method="post" data-chat-form>
+                <label class="sr-only" for="chat-reply">Tin nhắn phản hồi</label>
+                <textarea id="chat-reply" name="noiDung" maxlength="2000" placeholder="Nhập tin nhắn Zalo..." required></textarea>
+                <button type="submit" aria-label="Gửi tin nhắn">Gửi <span aria-hidden="true">↑</span></button>
+                <small>Tin nhắn được gửi qua Zalo · tối đa 2000 ký tự</small>
+            </form>
+        </section>
+        <section class="chat-panel chat-panel--empty" th:if="${hoSoDangChon == null and cuocTroChuyenDangChon == null}">
+            <span class="empty-chat-icon" aria-hidden="true">▤</span><h2>Chưa có hồ sơ</h2><p>Hồ sơ khách gửi sẽ xuất hiện trong danh sách này.</p>
+        </section>
+
+        <aside class="case-sidebar" th:if="${hoSoDangChon != null and cuocTroChuyenDangChon == null}">
+            <p class="eyebrow">Thông tin hồ sơ</p>
+            <h2 th:text="${hoSoDangChon.maHoSo}">HS-2026-000001</h2>
+            <span class="status-pill" th:text="${@nhanTrangThai.hienThi(hoSoDangChon.trangThai)}">Mới</span>
+            <p class="paid-repair-flag" th:if="${hoSoDangChon.ngoaiBaoHanh}">Sửa chữa ngoài bảo hành · khách đã đồng ý chi phí</p>
+            <dl class="case-details">
+                <div><dt>Mô tả vấn đề</dt><dd th:text="${hoSoDangChon.moTaLoi}">Mô tả</dd></div>
+                <div><dt>Khách hàng</dt><dd th:text="${thongTinKhachHangTheoHoSo[hoSoDangChon.id]['ten_khach_hang']}">Tên khách hàng</dd></div>
+                <div><dt>Số điện thoại</dt><dd><a th:href="|tel:${thongTinKhachHangTheoHoSo[hoSoDangChon.id]['so_dien_thoai']}|" th:text="${thongTinKhachHangTheoHoSo[hoSoDangChon.id]['so_dien_thoai']}">Số điện thoại</a></dd></div>
+                <div><dt>Serial</dt><dd th:text="${hoSoDangChon.serial != null ? hoSoDangChon.serial : 'Chưa cung cấp'}">Chưa cung cấp</dd></div>
+                <div><dt>Mã hồ sơ</dt><dd th:text="${hoSoDangChon.maHoSo}">HS-2026-000001</dd></div>
+                <div><dt>Kênh tiếp nhận</dt><dd th:text="${hoSoFacebook.contains(hoSoDangChon.id) ? 'Facebook Messenger' : (hoSoZalo.contains(hoSoDangChon.id) ? 'Zalo' : 'Website')}">Messenger</dd></div>
+            </dl>
+            <section class="sla-panel" th:if="${slaTheoHoSo[hoSoDangChon.id] != null}">
+                <div class="sla-panel-heading"><strong>Thời hạn xử lý</strong><small>Đồng hồ SLA</small></div>
+                <div class="sla-row" th:each="sla : ${slaTheoHoSo[hoSoDangChon.id]}">
+                    <span class="sla-indicator" th:classappend="${sla['nhan_trang_thai'] == 'QUA_HAN' or sla['nhan_trang_thai'] == 'KHONG_DAT_SLA' ? 'sla-indicator--late' : (sla['nhan_trang_thai'] == 'SAP_DEN_HAN' ? 'sla-indicator--soon' : (sla['nhan_trang_thai'] == 'TAM_DUNG' ? 'sla-indicator--paused' : ''))}"></span>
+                    <span class="sla-copy"><strong th:text="${sla['loai_sla'] == 'TIEP_NHAN' ? 'Xác minh CSKH' : 'Sửa chữa KTV'}">Sửa chữa KTV</strong><small th:text="${sla['den_han_luc'] != null ? 'Hạn ' + sla['den_han_luc'] : (sla['nhan_trang_thai'] == 'CHUA_BAT_DAU' ? 'Chờ phân công' : '')}">Hạn xử lý</small></span>
+                    <span class="sla-time" th:text="${sla['thoi_gian_hien_thi']}">Còn 2 ngày</span>
+                </div>
+            </section>
+            <div class="case-sidebar-actions">
+                <a class="button button--secondary" th:if="${laCskh and (hoSoDangChon.trangThai.name() == 'DANG_XAC_MINH' or hoSoDangChon.trangThai.name() == 'CHO_KHACH_BO_SUNG')}" th:href="@{/nhan-vien/ho-so/{id}/sua(id=${hoSoDangChon.id})}" th:text="${hoSoDangChon.trangThai.name() == 'CHO_KHACH_BO_SUNG' ? 'Cập nhật thông tin khách' : 'Sửa hồ sơ'}">Sửa hồ sơ</a>
+                <a class="button button--secondary" th:if="${hoSoDangChon.trangThai.name() == 'DANG_XAC_MINH'}" th:href="@{/nhan-vien/ho-so/{id}/xac-minh(id=${hoSoDangChon.id})}">Xác minh bảo hành</a>
+                <form th:if="${hoSoDangChon.trangThai.name() == 'DA_SUA_XONG' or hoSoDangChon.trangThai.name() == 'TU_CHOI' or hoSoDangChon.trangThai.name() == 'CHO_CSKH_XU_LY' or hoSoDangChon.trangThai.name() == 'CHO_KHACH_BO_SUNG'}" th:action="@{/nhan-vien/ho-so/{id}/dong(id=${hoSoDangChon.id})}" method="post"><input type="text" name="ghiChu" placeholder="Ghi chú đóng hồ sơ"><button class="danger" type="submit">Đóng hồ sơ</button></form>
+            </div>
+        </aside>
+        <aside class="case-sidebar conversation-sidebar" th:if="${cuocTroChuyenDangChon != null}">
+            <p class="eyebrow" th:text="${cuocTroChuyenDangChon['ma_kenh'] == 'ZALO' ? 'Khách hàng Zalo' : 'Khách hàng Messenger'}">Khách hàng</p>
+            <h2 th:text="${'Cuộc trò chuyện #' + cuocTroChuyenDangChon['id']}">Cuộc trò chuyện</h2>
+            <dl class="case-details">
+                <div><dt>Mã người gửi</dt><dd class="external-user-id" th:text="${cuocTroChuyenDangChon['ma_nguoi_dung_kenh']}">PSID</dd></div>
+                <div><dt>Hồ sơ liên kết</dt><dd th:text="${cuocTroChuyenDangChon['ho_so_id'] != null ? cuocTroChuyenDangChon['ho_so_id'] : 'Chưa có'}">Chưa có</dd></div>
+            </dl>
+            <form class="create-case-form" th:action="@{/nhan-vien/ho-so/cuoc-tro-chuyen/{id}/tao-ho-so(id=${cuocTroChuyenDangChon['id']})}" method="post">
+                <p class="eyebrow">Tạo hồ sơ bảo hành</p>
+                <p th:if="${cuocTroChuyenDangChon['khach_hang_id'] != null}" class="form-hint">Đã nhận diện khách hàng. Bạn có thể sửa thông tin nếu khách vừa cung cấp tên hoặc số điện thoại mới.</p>
+                <label>Họ tên<input name="hoTen" maxlength="200" required placeholder="Tên khách hàng" th:value="${cuocTroChuyenDangChon['ten_khach_hang']}"></label>
+                <label>Số điện thoại<input name="soDienThoai" maxlength="30" required placeholder="Số điện thoại" th:value="${cuocTroChuyenDangChon['so_dien_thoai']}"></label>
+                <label>Serial (nếu có)<input name="serial" maxlength="100" placeholder="Serial sản phẩm"></label>
+                <label>Mô tả lỗi<textarea name="moTa" required placeholder="Mô tả vấn đề sản phẩm"></textarea></label>
+                <button class="button--secondary" type="submit">Tạo hồ sơ từ cuộc chat</button>
+            </form>
+        </aside>
+    </section>
+
+    <section class="card-grid" aria-label="Tổng quan hồ sơ" th:unless="${laCskh}">
+        <article class="metric-card"><span class="metric-icon" aria-hidden="true">▤</span><div><span class="metric-value" th:text="${#lists.size(hoSos)}">0</span><span class="metric-label">Tổng hồ sơ tiếp nhận</span></div></article>
+        <article class="metric-card"><span class="metric-icon" aria-hidden="true">f</span><div><span class="metric-value" th:text="${hoSoFacebook.size()}">0</span><span class="metric-label">Hồ sơ từ Facebook Messenger</span></div></article>
+        <article class="metric-card"><span class="metric-icon" aria-hidden="true">Z</span><div><span class="metric-value" th:text="${hoSoZalo.size()}">0</span><span class="metric-label">Hồ sơ từ Zalo</span></div></article>
+    </section>
+
+    <div class="empty" id="danh-sach-ho-so" th:if="${!laCskh and #lists.isEmpty(hoSos)}">
+        <strong>Chưa có hồ sơ nào</strong><br>Yêu cầu mới sẽ xuất hiện tại đây khi hệ thống tiếp nhận.
+    </div>
+    <div class="table-wrap" id="danh-sach-ho-so" th:if="${!laCskh and !#lists.isEmpty(hoSos)}">
+        <nav class="category-filter" data-category-filter="cases" aria-label="Nhóm hồ sơ">
+            <button type="button" data-category="all" aria-pressed="true">Tất cả <span data-category-count="all"></span></button>
+            <button type="button" data-category="assignment">Chờ phân công <span data-category-count="assignment"></span></button>
+            <button type="button" data-category="acceptance">Chờ kỹ thuật viên tiếp nhận <span data-category-count="acceptance"></span></button>
+            <button type="button" data-category="repair">Đang sửa chữa <span data-category-count="repair"></span></button>
+            <button type="button" data-category="waiting">Đang chờ phản hồi <span data-category-count="waiting"></span></button>
+            <button type="button" data-category="verification">Đang xác minh <span data-category-count="verification"></span></button>
+            <button type="button" data-category="done">Đã hoàn tất <span data-category-count="done"></span></button>
+            <button type="button" data-category="rejected">Từ chối <span data-category-count="rejected"></span></button>
+        </nav>
+        <table>
+            <thead><tr><th>Mã hồ sơ</th><th>Khách hàng</th><th>Số điện thoại</th><th>Vấn đề khách gặp</th><th>Serial</th><th>Trạng thái</th><th th:if="${laDieuPhoiVien}">Kỹ thuật viên phụ trách</th><th>SLA</th><th>Tiếp nhận</th><th>Thao tác</th></tr></thead>
+            <tbody>
+            <tr th:each="hoSo : ${hoSos}" th:id="|ho-so-${hoSo.id}|"
+                data-category-item="cases"
+                th:attr="data-category=${hoSo.trangThai.name() == 'CHO_PHAN_CONG' ? (kyThuatVienTheoHoSo[hoSo.id] != null ? 'acceptance' : 'assignment') : (hoSo.trangThai.name() == 'DANG_SUA_CHUA' ? 'repair' : ((hoSo.trangThai.name() == 'CHO_CSKH_XU_LY' or hoSo.trangThai.name() == 'CHO_KHACH_BO_SUNG' or hoSo.trangThai.name() == 'CHO_LINH_KIEN') ? 'waiting' : ((hoSo.trangThai.name() == 'MOI' or hoSo.trangThai.name() == 'DANG_XAC_MINH') ? 'verification' : ((hoSo.trangThai.name() == 'DA_SUA_XONG' or hoSo.trangThai.name() == 'DA_DONG') ? 'done' : 'rejected'))))}">
+                <td><span class="case-id" th:text="${hoSo.maHoSo}"></span></td>
+                <td th:text="${thongTinKhachHangTheoHoSo[hoSo.id]['ten_khach_hang']}"></td>
+                <td><a th:href="|tel:${thongTinKhachHangTheoHoSo[hoSo.id]['so_dien_thoai']}|" th:text="${thongTinKhachHangTheoHoSo[hoSo.id]['so_dien_thoai']}"></a></td>
+                <td class="case-description"><span th:text="${hoSo.moTaLoi}"></span><div class="case-meta" th:if="${hoSoFacebook.contains(hoSo.id)}">Facebook Messenger</div><div class="case-meta" th:if="${hoSoZalo.contains(hoSo.id)}">Zalo</div></td>
+                <td th:text="${hoSo.serial != null ? hoSo.serial : 'Chưa có'}"></td>
+                <td><span class="status-pill" th:classappend="${hoSo.trangThai.name() == 'CHO_PHAN_CONG' or hoSo.trangThai.name() == 'CHO_CSKH_XU_LY' or hoSo.trangThai.name() == 'CHO_KHACH_BO_SUNG' or hoSo.trangThai.name() == 'CHO_LINH_KIEN' ? 'status-pill--waiting' : (hoSo.trangThai.name() == 'DA_SUA_XONG' or hoSo.trangThai.name() == 'TU_CHOI' ? 'status-pill--closed' : '')}" th:text="${hoSo.trangThai.name() == 'CHO_PHAN_CONG' and kyThuatVienTheoHoSo[hoSo.id] != null ? 'Chờ kỹ thuật viên tiếp nhận' : @nhanTrangThai.hienThi(hoSo.trangThai)}"></span></td>
+                <td th:if="${laDieuPhoiVien}" th:text="${kyThuatVienTheoHoSo[hoSo.id] != null ? kyThuatVienTheoHoSo[hoSo.id] : 'Chưa phân công'}"></td>
+                <td><div class="sla-table-list" th:if="${slaTheoHoSo[hoSo.id] != null}"><span class="sla-table-item" th:each="sla : ${slaTheoHoSo[hoSo.id]}" th:classappend="${sla['nhan_trang_thai'] == 'QUA_HAN' or sla['nhan_trang_thai'] == 'KHONG_DAT_SLA' ? 'sla-table-item--late' : (sla['nhan_trang_thai'] == 'SAP_DEN_HAN' ? 'sla-table-item--soon' : '')}"><small th:text="${sla['loai_sla'] == 'TIEP_NHAN' ? 'Xác minh' : 'Sửa chữa'}">Sửa chữa</small><strong th:text="${sla['thoi_gian_hien_thi']}">Còn 2 ngày</strong></span></div></td>
+                <td><time th:datetime="${hoSo.ngayTiepNhan}" th:text="${thoiGianTiepNhanTheoHoSo[hoSo.id]}"></time></td>
+                <td class="action-stack">
+                    <a class="button button--quiet" th:if="${laDieuPhoiVien and (hoSo.trangThai.name() == 'CHO_PHAN_CONG' or hoSo.trangThai.name() == 'DANG_SUA_CHUA')}" th:href="@{/nhan-vien/ho-so/{id}/phan-cong(id=${hoSo.id})}">Phân công kỹ thuật →</a>
+                    <span class="case-meta" th:unless="${laDieuPhoiVien and (hoSo.trangThai.name() == 'CHO_PHAN_CONG' or hoSo.trangThai.name() == 'DANG_SUA_CHUA')}">Không có thao tác</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div th:replace="~{fragments/layout :: staffFooter(true)}"></div>
+</main>
+<script th:src="@{/js/inbox.js}" th:if="${laCskh}" defer></script>
+<script th:src="@{/js/category-filter.js}" th:if="${!laCskh}" defer></script>
+</body>
+</html>
+

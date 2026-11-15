@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Công việc kỹ thuật · HauMai Care</title><link rel="stylesheet" th:href="@{/css/app.css(v='20261103-header-unified')}" >
+</head>
+<body>
+<div th:replace="~{fragments/layout :: staffTopbar(${username}, '/nhan-vien/ky-thuat-vien/ho-so', 'Việc được giao', false)}"></div>
+<main class="container">
+    <div class="page-heading"><div><p class="eyebrow">Khu vực kỹ thuật</p><h1>Công việc được phân công</h1><p>Tiếp nhận hồ sơ, sửa chữa và xác nhận hoàn thành.</p></div><div class="work-summary"><strong th:text="${#lists.size(hoSos)}">0</strong><span>hồ sơ đang theo dõi</span></div></div>
+    <p class="success" th:if="${thongBaoThanhCong}" th:text="${thongBaoThanhCong}"></p>
+    <p class="error" th:if="${loiThaoTac}" th:text="${loiThaoTac}"></p>
+    <div class="empty" th:if="${#lists.isEmpty(hoSos)}"><strong>Chưa có hồ sơ được giao</strong><br>Hồ sơ mới sẽ xuất hiện tại đây khi điều phối viên phân công.</div>
+
+    <nav class="category-filter" data-category-filter="technician-work" aria-label="Nhóm công việc" th:if="${!#lists.isEmpty(hoSos)}">
+        <button type="button" data-category="all" aria-pressed="true">Tất cả <span data-category-count="all"></span></button>
+        <button type="button" data-category="assigned">Cần tiếp nhận <span data-category-count="assigned"></span></button>
+        <button type="button" data-category="repair">Đang sửa chữa <span data-category-count="repair"></span></button>
+        <button type="button" data-category="done">Đã hoàn thành <span data-category-count="done"></span></button>
+    </nav>
+    <article class="panel panel--pad work-order" th:each="hoSo : ${hoSos}" th:id="|phan-cong-${hoSo['phan_cong_id']}|"
+             data-category-item="technician-work"
+             th:attr="data-category=${hoSo['trang_thai_ho_so'] == 'CHO_PHAN_CONG' ? 'assigned' : (hoSo['trang_thai_ho_so'] == 'DANG_SUA_CHUA' ? 'repair' : 'done')}">
+        <div class="page-heading" style="margin-top:0"><div><p class="eyebrow">Hồ sơ kỹ thuật</p><h2 th:text="${hoSo['ma_ho_so']}"></h2></div><span class="status-pill" th:text="${hoSo['trang_thai_ho_so'] == 'CHO_PHAN_CONG' ? 'Chờ tiếp nhận' : @nhanTrangThai.hienThi(hoSo['trang_thai_ho_so'])}"></span></div>
+        <div class="case-data-grid">
+            <div class="case-data"><small>Khách hàng</small><strong th:text="${hoSo['ten_khach_hang']}"></strong></div>
+            <div class="case-data"><small>Số điện thoại</small><strong th:text="${hoSo['so_dien_thoai']}"></strong></div>
+            <div class="case-data"><small>Serial</small><strong th:text="${hoSo['serial'] != null ? hoSo['serial'] : hoSo['serial_khach_khai_bao']}"></strong></div>
+            <div class="case-data"><small>Tiến độ</small><strong th:text="${hoSo['trang_thai_ho_so'] == 'CHO_PHAN_CONG' ? 'Chờ tiếp nhận' : @nhanTrangThai.hienThi(hoSo['trang_thai_ho_so'])}"></strong></div>
+            <div class="case-data" th:if="${hoSo['ngoai_bao_hanh']}"><small>Hình thức sửa chữa</small><strong>Sửa ngoài bảo hành · có phí</strong></div>
+        </div>
+        <section class="sla-panel sla-panel--work" th:if="${slaTheoHoSo[hoSo['ho_so_id']] != null}">
+            <div class="sla-panel-heading"><strong>Thời hạn xử lý</strong><small>Đồng hồ SLA</small></div>
+            <div class="sla-row" th:each="sla : ${slaTheoHoSo[hoSo['ho_so_id']]}">
+                <span class="sla-indicator" th:classappend="${sla['nhan_trang_thai'] == 'QUA_HAN' or sla['nhan_trang_thai'] == 'KHONG_DAT_SLA' ? 'sla-indicator--late' : (sla['nhan_trang_thai'] == 'SAP_DEN_HAN' ? 'sla-indicator--soon' : (sla['nhan_trang_thai'] == 'TAM_DUNG' ? 'sla-indicator--paused' : ''))}"></span>
+                <span class="sla-copy"><strong th:text="${sla['loai_sla'] == 'TIEP_NHAN' ? 'Xác minh CSKH' : 'Sửa chữa KTV'}">Sửa chữa KTV</strong><small th:text="${sla['den_han_luc'] != null ? 'Hạn ' + sla['den_han_luc'] : (sla['nhan_trang_thai'] == 'CHUA_BAT_DAU' ? 'Chờ phân công' : '')}">Hạn xử lý</small></span>
+                <span class="sla-time" th:text="${sla['thoi_gian_hien_thi']}">Còn 2 ngày</span>
+            </div>
+        </section>
+        <div class="notice"><strong>Mô tả lỗi:</strong> <span th:text="${hoSo['mo_ta_loi']}"></span></div>
+        <p class="notice" th:if="${hoSo['ghi_chu_tien_do'] != null}"><strong>Ghi chú gần nhất:</strong> <span th:text="${hoSo['ghi_chu_tien_do']}"></span></p>
+        <div class="form-actions" th:if="${hoSo['trang_thai_ho_so'] == 'CHO_PHAN_CONG'}">
+            <form th:action="@{/nhan-vien/ky-thuat-vien/phan-cong/{id}/tiep-nhan(id=${hoSo['phan_cong_id']})}" method="post">
+                <button type="submit">Tiếp nhận hồ sơ</button>
+            </form>
+        </div>
+        <div class="form-actions" th:if="${hoSo['trang_thai_ho_so'] == 'DANG_SUA_CHUA'}">
+            <form th:action="@{/nhan-vien/ky-thuat-vien/phan-cong/{id}/hoan-tat(id=${hoSo['phan_cong_id']})}" method="post">
+                <button type="submit">Hoàn thành sửa chữa</button>
+            </form>
+        </div>
+        <p class="notice" th:if="${hoSo['trang_thai_ho_so'] == 'DA_SUA_XONG'}">Đã hoàn thành sửa chữa.</p>
+    </article>
+    <script th:src="@{/js/category-filter.js}" th:if="${!#lists.isEmpty(hoSos)}" defer></script>
+    <div th:replace="~{fragments/layout :: staffFooter(false)}"></div>
+</main>
+</body>
+</html>
+

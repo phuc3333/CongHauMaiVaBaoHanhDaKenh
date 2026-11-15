@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5433/hau_mai?escapeSyntaxCallMode=callIfNoReturn
+    username: hau_mai_app
+    password: ${HAU_MAI_APP_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    url: jdbc:postgresql://127.0.0.1:5433/hau_mai?escapeSyntaxCallMode=callIfNoReturn
+    user: hau_mai
+    password: ${HAU_MAI_DB_PASSWORD:}
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never

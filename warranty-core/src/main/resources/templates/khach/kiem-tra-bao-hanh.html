@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kiểm tra bảo hành · HauMai Care</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20261028-logo')}">
+</head>
+<body>
+<main class="container--narrow">
+    <header class="page-top">
+        <a class="brand" th:href="@{/}"><img class="brand-mark" th:src="@{/images/logo-transparent.png}" alt="HauMai Care"><span class="brand-copy"><strong>HauMai Care</strong><small>Customer support</small></span></a>
+        <a class="nav-link" th:href="@{/khach/tra-cuu}">Tra cứu hồ sơ</a>
+    </header>
+
+    <div class="page-heading"><div><p class="eyebrow">Hỗ trợ sau mua</p><h1>Kiểm tra bảo hành</h1><p>Nhập serial trên tem sản phẩm để xem thời hạn bảo hành hiện tại.</p></div></div>
+    <section class="panel panel--pad">
+        <p class="error" th:if="${loiKiemTraBaoHanh}" th:text="${loiKiemTraBaoHanh}"></p>
+        <form th:action="@{/khach/kiem-tra-bao-hanh}" method="post">
+            <label for="serial">Serial sản phẩm</label>
+            <input id="serial" name="serial" th:value="${serialNhap}" placeholder="Ví dụ: HM-RO-2026-004" required maxlength="100" autocomplete="off">
+            <button type="submit">Kiểm tra bảo hành <span aria-hidden="true">→</span></button>
+        </form>
+    </section>
+
+    <section class="panel panel--pad" style="margin-top:18px" th:if="${ketQuaBaoHanh != null}">
+        <p class="eyebrow">Kết quả kiểm tra</p>
+        <h2 th:text="${ketQuaBaoHanh['ten_san_pham']}">Sản phẩm</h2>
+        <dl class="detail-list">
+            <div><dt>Serial</dt><dd th:text="${ketQuaBaoHanh['serial']}"></dd></div>
+            <div><dt>Tình trạng</dt><dd><span class="status-pill" th:classappend="${ketQuaBaoHanh['trang_thai_bao_hanh'] == 'HET_HAN' ? 'status-pill--closed' : (ketQuaBaoHanh['trang_thai_bao_hanh'] == 'CHUA_XAC_DINH' ? 'status-pill--waiting' : '')}" th:text="${ketQuaBaoHanh['trang_thai_bao_hanh'] == 'CON_HAN' ? 'Còn bảo hành' : (ketQuaBaoHanh['trang_thai_bao_hanh'] == 'HET_HAN' ? 'Đã hết hạn' : 'Chưa xác định thời hạn')}"></span></dd></div>
+            <div><dt>Ngày hết hạn</dt><dd th:text="${ketQuaBaoHanh['ngay_het_han_bao_hanh'] != null ? ketQuaBaoHanh['ngay_het_han_bao_hanh'] : 'Chưa có thông tin'}"></dd></div>
+            <div th:if="${ketQuaBaoHanh['trang_thai_bao_hanh'] == 'CON_HAN'}"><dt>Thời gian còn lại</dt><dd th:text="${ketQuaBaoHanh['so_ngay_con_lai'] + ' ngày'}"></dd></div>
+        </dl>
+    </section>
+    <p class="footer-note">HauMai Care · Kiểm tra thời hạn bảo hành sản phẩm</p>
+</main>
+</body>
+</html>

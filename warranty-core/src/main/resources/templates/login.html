@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng nhập nhân viên · HauMai Care</title><link rel="stylesheet" th:href="@{/css/app.css(v='20261028-logo')}">
+</head>
+<body class="login-page">
+<main class="container--narrow login-layout">
+    <header class="page-top"><a class="brand" th:href="@{/}"><img class="brand-mark" th:src="@{/images/logo-transparent.png}" alt="HauMai Care"><span class="brand-copy"><strong>HauMai Care</strong><small>Hậu mãi & bảo hành</small></span></a><a class="nav-link" th:href="@{/}">← Trang chủ</a></header>
+    <section class="panel panel--pad login-card">
+        <div class="login-heading"><p class="eyebrow">Không gian làm việc</p><h1>Đăng nhập nhân viên</h1><p>Truy cập hồ sơ, cuộc trò chuyện và công việc được phân công.</p></div>
+        <p class="error" th:if="${param.error}">Tên đăng nhập hoặc mật khẩu chưa đúng. Vui lòng thử lại.</p>
+        <p class="success" th:if="${param.logout}">Bạn đã đăng xuất thành công.</p>
+        <form th:action="@{/login}" method="post">
+            <label for="username">Tên đăng nhập</label>
+            <input id="username" name="username" autocomplete="username" autofocus required>
+            <label for="password">Mật khẩu</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+            <button type="submit">Đăng nhập <span aria-hidden="true">→</span></button>
+        </form>
+    </section>
+    <p class="footer-note"><a th:href="@{/khach/tra-cuu}">Tra cứu hồ sơ khách hàng</a></p>
+</main>
+</body>
+</html>

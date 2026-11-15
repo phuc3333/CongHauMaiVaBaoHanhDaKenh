@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chỉnh sửa hồ sơ · HauMai Care</title><link rel="stylesheet" th:href="@{/css/app.css(v='20261103-header-unified')}" />
+</head>
+<body>
+<div th:replace="~{fragments/layout :: staffTopbar(${username}, '/nhan-vien/ho-so', 'Hộp thư CSKH', true)}"></div>
+<main class="container case-edit-page">
+    <a class="back-link" th:href="@{/nhan-vien/ho-so?caseId={id}(id=${hoSo['id']})}"><span aria-hidden="true">←</span> Trở về hồ sơ</a>
+    <div class="page-heading"><div><p class="eyebrow">CSKH · Cập nhật thông tin</p><h1>Chỉnh sửa hồ sơ</h1><p>Kiểm tra lại thông tin khách hàng và sản phẩm trước khi xác minh.</p></div></div>
+    <section class="panel panel--pad case-edit-panel">
+        <header class="case-edit-header">
+            <div><span class="case-edit-kicker">Mã hồ sơ</span><strong th:text="${hoSo['ma_ho_so']}">HS-2026-000024</strong></div>
+            <span class="status-pill status-pill--waiting" th:if="${dangChoKhachBoSung}">Chờ khách bổ sung</span>
+            <span class="status-pill" th:unless="${dangChoKhachBoSung}">Đang xác minh</span>
+        </header>
+        <form class="case-edit-form" th:action="@{/nhan-vien/ho-so/{id}/sua(id=${hoSo['id']})}" method="post">
+            <div class="case-edit-section-title"><span>01</span><div><strong>Thông tin khách hàng</strong><small>Cập nhật thông tin liên hệ chính xác</small></div></div>
+            <div class="case-edit-fields">
+                <label>Họ tên khách hàng<input name="hoTen" maxlength="200" required th:value="${hoSo['ho_ten']}"></label>
+                <label>Số điện thoại<input name="soDienThoai" maxlength="30" required th:value="${hoSo['so_dien_thoai']}"></label>
+            </div>
+            <div class="case-edit-section-title"><span>02</span><div><strong>Thông tin sản phẩm</strong><small th:text="${dangChoKhachBoSung ? 'Cập nhật serial khách vừa gửi để hệ thống xác minh lại' : 'Serial sẽ được đối chiếu với danh mục đã đăng ký'}">Serial sẽ được đối chiếu với danh mục đã đăng ký</small></div></div>
+            <label>Serial sản phẩm<input name="serial" maxlength="100" th:value="${hoSo['serial']}" placeholder="Nhập serial trên tem sản phẩm"></label>
+            <label>Mô tả lỗi<textarea name="moTa" maxlength="4000" required th:text="${hoSo['mo_ta_loi']}" placeholder="Mô tả tình trạng khách hàng gặp phải"></textarea></label>
+            <footer class="case-edit-actions">
+                <a class="button button--secondary" th:href="@{/nhan-vien/ho-so?caseId={id}(id=${hoSo['id']})}">Hủy</a>
+                <button type="submit"><span aria-hidden="true">✓</span><span th:text="${dangChoKhachBoSung ? 'Lưu và xác minh lại' : 'Lưu thay đổi'}">Lưu thay đổi</span></button>
+            </footer>
+        </form>
+    </section>
+    <div th:replace="~{fragments/layout :: staffFooter(true)}"></div>
+</main>
+</body>
+</html>

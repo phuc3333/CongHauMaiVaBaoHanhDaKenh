@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="30">
+    <title>Giám sát SLA · HauMai Care</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20261103-header-unified')}" >
+</head>
+<body>
+<div th:replace="~{fragments/layout :: staffTopbar(${username}, '/nhan-vien/ho-so', 'Hồ sơ', true)}"></div>
+<main class="container--wide sla-dashboard">
+
+    <header class="sla-page-heading">
+        <div><p class="eyebrow">Điều phối vận hành</p><h1>Giám sát SLA</h1><p>Theo dõi thời hạn xác minh bảo hành và sửa chữa. Danh sách tự cập nhật mỗi 30 giây.</p></div>
+        <span class="sla-live"><i></i> Đang theo dõi</span>
+    </header>
+
+    <section class="sla-summary" aria-label="Tổng quan SLA">
+        <a class="sla-summary-card sla-summary-card--late" href="#sla-vi-pham"><span class="sla-summary-label">Hồ sơ có SLA vi phạm</span><strong th:text="${soHoSoQuaHan}">0</strong><small>Ưu tiên xử lý ngay</small></a>
+        <a class="sla-summary-card sla-summary-card--soon" href="#sla-sap-han"><span class="sla-summary-label">Hồ sơ sắp đến hạn</span><strong th:text="${soHoSoSapDenHan}">0</strong><small>Đang trong ngưỡng cảnh báo</small></a>
+        <a class="sla-summary-card" href="#sla-dang-theo-doi"><span class="sla-summary-label">Hồ sơ đang theo dõi</span><strong th:text="${soHoSoDangTheoDoi}">0</strong><small>Đang chạy, tạm dừng hoặc chờ phân công</small></a>
+    </section>
+
+    <section class="sla-queue sla-queue--late" id="sla-vi-pham">
+        <header><div><p class="eyebrow">Cần xử lý trước</p><h2>Đã vi phạm SLA</h2></div><span class="sla-queue-count" th:text="${#lists.size(slaViPham)} + ' mốc SLA'">0 mốc SLA</span></header>
+        <div class="empty sla-empty" th:if="${#lists.isEmpty(slaViPham)}">Chưa có hồ sơ vi phạm SLA đang mở.</div>
+        <div class="table-wrap" th:if="${!#lists.isEmpty(slaViPham)}"><table>
+            <thead><tr><th>Hồ sơ</th><th>Khách hàng</th><th>Thời hạn</th><th>Tình trạng SLA</th><th>Phụ trách</th><th>Trạng thái hồ sơ</th><th></th></tr></thead>
+            <tbody><tr th:each="sla : ${slaViPham}">
+                <td><a class="case-id" th:href="${laCskh ? '/nhan-vien/ho-so?caseId=' + sla['ho_so_id'] : '/nhan-vien/ho-so#ho-so-' + sla['ho_so_id']}" th:text="${sla['ma_ho_so']}">HS-2026-000001</a><small class="sla-description" th:text="${sla['mo_ta_loi']}">Mô tả lỗi</small></td>
+                <td th:text="${sla['ten_khach_hang']}">Khách hàng</td>
+                <td th:text="${sla['loai_sla'] == 'TIEP_NHAN' ? 'Xác minh CSKH' : 'Sửa chữa KTV'}">Sửa chữa KTV</td>
+                <td><span class="sla-table-item--late" th:text="${sla['thoi_gian_hien_thi']}">Quá hạn</span><small class="sla-description" th:text="${sla['den_han_luc']}"></small></td>
+                <td th:text="${sla['ky_thuat_vien'] != null ? sla['ky_thuat_vien'] : 'Chưa phân công'}">Kỹ thuật viên</td>
+                <td><span class="status-pill status-pill--waiting" th:text="${@nhanTrangThai.hienThi(sla['trang_thai_ho_so'])}">Đang xử lý</span></td>
+                <td><a class="sla-open-link" th:href="${laCskh ? '/nhan-vien/ho-so?caseId=' + sla['ho_so_id'] : '/nhan-vien/ho-so#ho-so-' + sla['ho_so_id']}">Mở hồ sơ →</a></td>
+            </tr></tbody>
+        </table></div>
+    </section>
+
+    <section class="sla-queue sla-queue--soon" id="sla-sap-han">
+        <header><div><p class="eyebrow">Theo dõi sát</p><h2>Sắp đến hạn</h2></div><span class="sla-queue-count" th:text="${#lists.size(slaSapDenHan)} + ' mốc SLA'">0 mốc SLA</span></header>
+        <div class="empty sla-empty" th:if="${#lists.isEmpty(slaSapDenHan)}">Chưa có hồ sơ nào trong ngưỡng cảnh báo.</div>
+        <div class="table-wrap" th:if="${!#lists.isEmpty(slaSapDenHan)}"><table>
+            <thead><tr><th>Hồ sơ</th><th>Khách hàng</th><th>Thời hạn</th><th>Còn lại</th><th>Phụ trách</th><th>Trạng thái hồ sơ</th><th></th></tr></thead>
+            <tbody><tr th:each="sla : ${slaSapDenHan}">
+                <td><a class="case-id" th:href="${laCskh ? '/nhan-vien/ho-so?caseId=' + sla['ho_so_id'] : '/nhan-vien/ho-so#ho-so-' + sla['ho_so_id']}" th:text="${sla['ma_ho_so']}">HS-2026-000001</a><small class="sla-description" th:text="${sla['mo_ta_loi']}">Mô tả lỗi</small></td>
+                <td th:text="${sla['ten_khach_hang']}">Khách hàng</td>
+                <td th:text="${sla['loai_sla'] == 'TIEP_NHAN' ? 'Xác minh CSKH' : 'Sửa chữa KTV'}">Sửa chữa KTV</td>
+                <td><strong class="sla-table-item--soon" th:text="${sla['thoi_gian_hien_thi']}">Còn 20 phút</strong><small class="sla-description" th:text="${sla['den_han_luc']}"></small></td>
+                <td th:text="${sla['ky_thuat_vien'] != null ? sla['ky_thuat_vien'] : 'Chưa phân công'}">Kỹ thuật viên</td>
+                <td><span class="status-pill status-pill--waiting" th:text="${@nhanTrangThai.hienThi(sla['trang_thai_ho_so'])}">Đang xử lý</span></td>
+                <td><a class="sla-open-link" th:href="${laCskh ? '/nhan-vien/ho-so?caseId=' + sla['ho_so_id'] : '/nhan-vien/ho-so#ho-so-' + sla['ho_so_id']}">Mở hồ sơ →</a></td>
+            </tr></tbody>
+        </table></div>
+    </section>
+
+    <section class="sla-queue" id="sla-dang-theo-doi">
+        <header><div><p class="eyebrow">Còn trong thời hạn</p><h2>Đang theo dõi</h2></div><span class="sla-queue-count" th:text="${#lists.size(slaDangTheoDoi)} + ' mốc SLA'">0 mốc SLA</span></header>
+        <div class="empty sla-empty" th:if="${#lists.isEmpty(slaDangTheoDoi)}">Không có đồng hồ SLA nào đang chạy hoặc tạm dừng.</div>
+        <div class="table-wrap" th:if="${!#lists.isEmpty(slaDangTheoDoi)}"><table>
+            <thead><tr><th>Hồ sơ</th><th>Khách hàng</th><th>Thời hạn</th><th>Còn lại</th><th>Phụ trách</th><th>Trạng thái hồ sơ</th><th></th></tr></thead>
+            <tbody><tr th:each="sla : ${slaDangTheoDoi}">
+                <td><a class="case-id" th:href="${laCskh ? '/nhan-vien/ho-so?caseId=' + sla['ho_so_id'] : '/nhan-vien/ho-so#ho-so-' + sla['ho_so_id']}" th:text="${sla['ma_ho_so']}">HS-2026-000001</a><small class="sla-description" th:text="${sla['mo_ta_loi']}">Mô tả lỗi</small></td>
+                <td th:text="${sla['ten_khach_hang']}">Khách hàng</td>
+                <td th:text="${sla['loai_sla'] == 'TIEP_NHAN' ? 'Xác minh CSKH' : 'Sửa chữa KTV'}">Sửa chữa KTV</td>
+                <td th:text="${sla['thoi_gian_hien_thi']}">Còn 2 ngày</td>
+                <td th:text="${sla['ky_thuat_vien'] != null ? sla['ky_thuat_vien'] : 'Chưa phân công'}">Kỹ thuật viên</td>
+                <td><span class="status-pill" th:classappend="${sla['nhan_trang_thai'] == 'TAM_DUNG' ? 'status-pill--closed' : ''}" th:text="${@nhanTrangThai.hienThi(sla['trang_thai_ho_so'])}">Đang xử lý</span></td>
+                <td><a class="sla-open-link" th:href="${laCskh ? '/nhan-vien/ho-so?caseId=' + sla['ho_so_id'] : '/nhan-vien/ho-so#ho-so-' + sla['ho_so_id']}">Mở hồ sơ →</a></td>
+            </tr></tbody>
+        </table></div>
+    </section>
+
+    <div th:replace="~{fragments/layout :: staffFooter(true)}"></div>
+</main>
+</body>
+</html>
