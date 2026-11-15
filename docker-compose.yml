@@ -9,6 +9,7 @@
       POSTGRES_DB: hau_mai
       POSTGRES_USER: hau_mai
       POSTGRES_PASSWORD: ${HAU_MAI_DB_PASSWORD:?Set HAU_MAI_DB_PASSWORD in the project .env file}
+      HAU_MAI_APP_PASSWORD: ${HAU_MAI_APP_PASSWORD:?Set HAU_MAI_APP_PASSWORD in the project .env file}
     ports:
       - "5433:5432"
     volumes:

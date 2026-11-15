@@ -5,4 +5,4 @@ hau_mai_before_pg_cron.dump
 .vscode
 docs
 scripts
-database
+database/schema-current.sql
