@@ -12,15 +12,6 @@ HauMai Care là hệ thống tiếp nhận và quản lý yêu cầu hậu mãi,
 
 ## Kiến trúc
 
-```mermaid
-flowchart LR
-    Browser[Trình duyệt] --> Core["warranty-core<br/>Giao diện và nghiệp vụ<br/>Cổng 8080"]
-    Channels[Kênh nhắn tin] --> Gateway["channel-gateway<br/>Webhook và gửi phản hồi<br/>Cổng 8081 nội bộ"]
-    Core <--> Streams[(Redis Streams)]
-    Gateway <--> Streams
-    Core --> DB[(PostgreSQL)]
-```
-
 Trong `warranty-core`, mã nguồn được tổ chức theo ba tầng: Controller, Service và Repository. Ứng dụng `channel-gateway` tiếp nhận webhook và gửi phản hồi; hai ứng dụng trao đổi thông điệp qua Redis Streams. Chỉ `warranty-core` kết nối PostgreSQL. Lược đồ được cập nhật bằng Flyway migrations.
 
 ## Công nghệ
