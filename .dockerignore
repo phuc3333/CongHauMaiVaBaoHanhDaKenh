@@ -1,0 +1,8 @@
+**/target
+.git
+hau_mai_before_pg_cron.dump
+.env
+.vscode
+docs
+scripts
+database
