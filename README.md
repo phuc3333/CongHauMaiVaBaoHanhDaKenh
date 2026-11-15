@@ -46,26 +46,55 @@ Trong `warranty-core`, mã nguồn được tổ chức theo ba tầng: Controll
    cd CongHauMaiVaBaoHanhDaKenh
    ```
 
-2. Tạo file `.env` từ mẫu:
+2. Tạo file `.env` ở thư mục gốc với cấu hình local sau; thay các giá trị mật khẩu/chuỗi bí mật trước khi chạy:
 
-   ```powershell
-   Copy-Item .env.example .env
+   ```dotenv
+   HAU_MAI_DB_PASSWORD=mat_khau_postgres_local
+   HAU_MAI_APP_PASSWORD=mat_khau_ung_dung_local
+   ZALO_APP_ID=local-demo-app
+   ZALO_OA_WEBHOOK_SECRET=chuoi_bi_mat_demo_local
+   ZALO_DEMO_ENABLED=true
+   ZALO_SENDER=fake
    ```
 
-   Mở `.env`, thay giá trị bắt đầu bằng `replace-with-` bằng các mật khẩu/chuỗi bí mật riêng cho máy local. Không commit hoặc gửi `.env` lên GitHub. Các biến Facebook và Zalo OA thật chỉ cần cấu hình nếu kết nối tài khoản kênh thật.
+   Không commit hoặc gửi file `.env` lên GitHub. Các biến Facebook và Zalo OA thật chỉ cần cấu hình nếu kết nối tài khoản kênh thật.
 
-3. Khởi động các dịch vụ:
+3. **Chỉ với CSDL mới chưa có dữ liệu**, tạo các vai trò PostgreSQL mà migration cần. Khởi động PostgreSQL:
+
+   ```powershell
+   docker compose up -d postgres
+   docker compose ps
+   ```
+
+   Khi PostgreSQL đã sẵn sàng, mở phiên `psql`:
+
+   ```powershell
+   docker compose exec postgres psql -U hau_mai -d hau_mai
+   ```
+
+   Nhập các dòng sau. Khi được hỏi mật khẩu cho `hau_mai_app`, nhập đúng giá trị `HAU_MAI_APP_PASSWORD` trong `.env`:
+
+   ```sql
+   CREATE ROLE hau_mai_owner NOLOGIN;
+   CREATE ROLE hau_mai_app LOGIN;
+   \password hau_mai_app
+   \q
+   ```
+
+   Nếu dùng volume CSDL đã được thiết lập trước đó và hai vai trò này đã tồn tại, bỏ qua bước tạo vai trò.
+
+4. Khởi động toàn bộ dịch vụ:
 
    ```powershell
    docker compose up -d --build
    docker compose ps
    ```
 
-   Đợi PostgreSQL, Redis, `warranty-core` và `channel-gateway` chuyển sang trạng thái đang chạy. Khi tạo CSDL mới, Docker khởi tạo các vai trò cần thiết trước; sau đó `warranty-core` áp dụng migration Flyway khi khởi động.
+   Đợi PostgreSQL, Redis, `warranty-core` và `channel-gateway` chuyển sang trạng thái đang chạy. `warranty-core` áp dụng migration Flyway khi khởi động.
 
    Các mật khẩu trong `.env` được áp dụng khi PostgreSQL tạo volume dữ liệu lần đầu. Nếu volume đã được tạo từ trước, đổi mật khẩu trong `.env` không tự đổi mật khẩu đã lưu trong PostgreSQL.
 
-4. Mở hệ thống:
+5. Mở hệ thống:
 
    | Nội dung | Địa chỉ |
    |---|---|
@@ -115,11 +144,11 @@ Dữ liệu PostgreSQL và Redis được lưu trong Docker volumes. Không thê
 ## Cấu trúc thư mục
 
 ```text
-channel-contract/  Cấu trúc thông điệp dùng chung
-channel-gateway/   Webhook và tích hợp kênh
-database/init/     Khởi tạo các vai trò PostgreSQL cho CSDL mới
-warranty-core/     Giao diện, nghiệp vụ, repository và Flyway migrations
-docker-compose.yml Cấu hình chạy các dịch vụ
+channel-contract/           Cấu trúc thông điệp dùng chung
+channel-gateway/            Webhook và tích hợp kênh
+database/schema-current.sql  Ảnh chụp lược đồ PostgreSQL
+warranty-core/              Giao diện, nghiệp vụ, repository và Flyway migrations
+docker-compose.yml          Cấu hình chạy các dịch vụ
 ```
 
 ## Ghi chú
